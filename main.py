@@ -38,8 +38,8 @@ class Comments(Base):
 class Albums(Base):
     __tablename__ = "albums"
     id: Mapped[int] = mapped_column(primary_key=True)
-    userId: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    userId: Mapped[int] = mapped_column(ForeignKey('users.id'))
     title: Mapped[str] = mapped_column(String(3000))
     
-engine = create_engine("sqlite+pysqlite:///users.db")
+engine = create_engine("sqlite+pysqlite:///users2.db")
 Base.metadata.create_all(engine)

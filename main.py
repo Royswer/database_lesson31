@@ -19,6 +19,12 @@ class Posts(Base):
     title: Mapped[str] = mapped_column(String(1000))
     body: Mapped[str] = mapped_column(String(1000))
 
-
+class Photos(Base):
+    __tablename__ = "photos"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    albumId: Mapped[int] = mapped_column
+    title: Mapped[str] = mapped_column(String(3000))
+    url: Mapped[str] = mapped_column(String(1000))
+    thumbnailUrl: Mapped[str] = mapped_column(String(1000))
 engine = create_engine("sqlite+pysqlite:///users.db")
 Base.metadata.create_all(engine)

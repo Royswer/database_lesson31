@@ -26,5 +26,15 @@ class Photos(Base):
     title: Mapped[str] = mapped_column(String(3000))
     url: Mapped[str] = mapped_column(String(1000))
     thumbnailUrl: Mapped[str] = mapped_column(String(1000))
+
+class Comments(Base):
+    __tablename__ = "comments"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    postId: Mapped[int] = mapped_column(ForeignKey('posts.id'))
+    name: Mapped[str] = mapped_column(String(3000))
+    email: Mapped[str] = mapped_column(String(3000))
+    body: Mapped[str] = mapped_column(String(3000))
+
+
 engine = create_engine("sqlite+pysqlite:///users.db")
 Base.metadata.create_all(engine)

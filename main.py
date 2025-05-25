@@ -1,45 +1,60 @@
-from sqlalchemy import Integer, String, Boolean, Date, Text, create_engine, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+import requests
+from db_manager import DB
 
 
-class Base(DeclarativeBase):
-    pass
-
-class User(Base):
-    __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(100))
-    username: Mapped[str] = mapped_column(String(100))
-    phone: Mapped[str] = mapped_column(String(100))
-
-class Posts(Base):
-    __tablename__ = "posts"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    userId: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    title: Mapped[str] = mapped_column(String(1000))
-    body: Mapped[str] = mapped_column(String(1000))
-
-class Photos(Base):
-    __tablename__ = "photos"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    albumId: Mapped[int] = mapped_column
-    title: Mapped[str] = mapped_column(String(3000))
-    url: Mapped[str] = mapped_column(String(1000))
-    thumbnailUrl: Mapped[str] = mapped_column(String(1000))
-
-class Comments(Base):
-    __tablename__ = "comments"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    postId: Mapped[int] = mapped_column(ForeignKey('posts.id'))
-    name: Mapped[str] = mapped_column(String(3000))
-    email: Mapped[str] = mapped_column(String(3000))
-    body: Mapped[str] = mapped_column(String(3000))
-
-class Albums(Base):
-    __tablename__ = "albums"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    userId: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    title: Mapped[str] = mapped_column(String(3000))
+def fetch_and_store():
     
-engine = create_engine("sqlite+pysqlite:///users2.db")
-Base.metadata.create_all(engine)
+    # Пользователи:
+    users_response = requests.get('https://jsonplaceholder.typicode.com/users')
+    users = users_response.json()
+    
+    # for user in users:
+    #     db_manager.add_user(user['id'], user['name'], user['username'], user['phone'])
+    u = []
+    for user in users:
+        u.append({'id': user['id'],
+                  'name': user['name'],
+                  'username': user['username'],
+                  'phone': user['phone'],
+                  })
+    db_manager.add_users(u)
+        
+    
+    # Посты:
+    posts_response = requests.get('https://jsonplaceholder.typicode.com/posts')
+    posts = posts_response.json()
+    
+    for post in posts:
+        db_manager.add_posts(post['id'], post['userId'], post['title'], post['body'])
+    return
+    # Комментарии:
+    comments_response = requests.get('https://jsonplaceholder.typicode.com/comments')
+    comments = comments_response.json()
+    
+    for comment in comments:
+        cursor.execute('INSERT OR REPLACE INTO comments (postId, id, name, email, body) VALUES (?, ?, ?, ?, ?)',
+                       (comment['postId'], comment['id'], comment['name'], comment['email'], comment['body']))
+    
+    # Альбомы:
+    albums_response = requests.get('https://jsonplaceholder.typicode.com/albums')
+    albums = albums_response.json()
+    
+    for album in albums:
+        cursor.execute('INSERT OR REPLACE INTO albums (id, userId, title) VALUES (?, ?, ?)',
+                       (album['id'], album['userId'], album['title']))
+    
+    # Фото:
+    photos_response = requests.get('https://jsonplaceholder.typicode.com/photos')
+    photos = photos_response.json()
+    
+    for photo in photos:
+        cursor.execute('INSERT OR REPLACE INTO photos (albumId, id, title, url, thumbnailUrl) VALUES (?, ?, ?, ?, ?)',
+                       (photo['albumId'], photo['id'], photo['title'], photo['url'], photo['thumbnailUrl']))
+    
+
+
+
+
+db_manager = DB('test.db')
+db_manager.create_db()
+fetch_store = fetch_and_store()
